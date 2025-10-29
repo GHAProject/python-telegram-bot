@@ -38,48 +38,48 @@ jobs:
         run: |
           echo "should_run=true" >> $GITHUB_OUTPUT
 
-  # # Job 2: Security and Quality Checks
-  # security-and-quality:
-  #   needs: setup
-  #   runs-on: ubuntu-latest
-  #   if: needs.setup.outputs.should_run == 'true'
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
-  #       with:
-  #         fetch-depth: 0
+  # Job 2: Security and Quality Checks
+  security-and-quality:
+    needs: setup
+    runs-on: ubuntu-latest
+    if: needs.setup.outputs.should_run == 'true'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-  #     # CodeQL Security Analysis
-  #     - name: Initialize CodeQL
-  #       uses: github/codeql-action/init@v3
-  #       with:
-  #         languages: python
+      # CodeQL Security Analysis
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: python
 
-  #     - name: Autobuild
-  #       uses: github/codeql-action/autobuild@v3
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
 
-  #     - name: Perform CodeQL Analysis
-  #       uses: github/codeql-action/analyze@v3
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
 
-  #     # Link checking
-  #     - name: Check links in documentation
-  #       uses: lycheeverse/lychee-action@v2
-  #       with:
-  #         args: '--verbose --no-progress --accept 200,429 "**/*.md" "**/*.rst" "**/*.html"'
-  #         fail: true
-  #       continue-on-error: true
+      # Link checking
+      - name: Check links in documentation
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: '--verbose --no-progress --accept 200,429 "**/*.md" "**/*.rst" "**/*.html"'
+          fail: true
+        continue-on-error: true
 
-  #     - name: Comment on PR with broken links
-  #       if: failure() && github.event_name == 'pull_request'
-  #       uses: peter-evans/create-or-update-comment@v4
-  #       with:
-  #         issue-number: ${{ github.event.pull_request.number }}
-  #         body: |
-  #           ## ⚠️ Broken Links Detected
+      - name: Comment on PR with broken links
+        if: failure() && github.event_name == 'pull_request'
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            ## ⚠️ Broken Links Detected
             
-  #           The link checker found broken links in this PR. Please review the logs above and fix them.
+            The link checker found broken links in this PR. Please review the logs above and fix them.
             
-  #           This is an automated message from the CI/CD workflow.
+            This is an automated message from the CI/CD workflow.
 
   # # Job 3: Audit PR Changes
   # audit-changes:
