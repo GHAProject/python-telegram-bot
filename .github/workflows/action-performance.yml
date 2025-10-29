@@ -41,7 +41,7 @@ jobs:
   # Job 2: Security and Quality Checks
   security-and-quality:
     needs: setup
-    runs-on: selfl-hosted
+    runs-on: self-hosted
     if: needs.setup.outputs.should_run == 'true'
     steps:
       - name: Checkout repository
