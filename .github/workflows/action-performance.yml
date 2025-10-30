@@ -81,269 +81,269 @@ jobs:
             
             This is an automated message from the CI/CD workflow.
 
-  # # Job 3: Audit PR Changes
-  # audit-changes:
-  #   needs: setup
-  #   runs-on: self-hosted
-  #   if: github.event_name == 'pull_request'
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
+  # Job 3: Audit PR Changes
+  audit-changes:
+    needs: setup
+    runs-on: self-hosted
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-  #     - name: Create auditor config
-  #       run: |
-  #         mkdir -p .github/config
-  #         cat > .github/config/auditor.yml << 'EOF'
-  #         rules:
-  #           - name: "No TODO comments in production"
-  #             type: regex
-  #             pattern: "TODO|FIXME|HACK"
-  #             message: "Please resolve TODO/FIXME/HACK comments before merging"
+      - name: Create auditor config
+        run: |
+          mkdir -p .github/config
+          cat > .github/config/auditor.yml << 'EOF'
+          rules:
+            - name: "No TODO comments in production"
+              type: regex
+              pattern: "TODO|FIXME|HACK"
+              message: "Please resolve TODO/FIXME/HACK comments before merging"
               
-  #           - name: "No hardcoded secrets patterns"
-  #             type: regex
-  #             pattern: "(password|secret|token|api_key)\\s*=\\s*['\"][^'\"]{8,}"
-  #             message: "Potential hardcoded secret detected"
+            - name: "No hardcoded secrets patterns"
+              type: regex
+              pattern: "(password|secret|token|api_key)\\s*=\\s*['\"][^'\"]{8,}"
+              message: "Potential hardcoded secret detected"
               
-  #           - name: "No print statements in Python code"
-  #             type: regex
-  #             pattern: "^\\s*print\\("
-  #             message: "Use logging instead of print statements"
+            - name: "No print statements in Python code"
+              type: regex
+              pattern: "^\\s*print\\("
+              message: "Use logging instead of print statements"
               
-  #         global_options:
-  #           alert_level: warn
-  #           comment_on_pr: true
-  #           request_reviewers: false
-  #           labels:
-  #             - needs-review
-  #           exclude_regex:
-  #             - "^tests/"
-  #             - "^examples/"
-  #             - "\\.md$"
-  #         EOF
+          global_options:
+            alert_level: warn
+            comment_on_pr: true
+            request_reviewers: false
+            labels:
+              - needs-review
+            exclude_regex:
+              - "^tests/"
+              - "^examples/"
+              - "\\.md$"
+          EOF
 
-  #     - name: Run Auditor Action
-  #       uses: GrantBirki/auditor-action@v3.0.1
-  #       with:
-  #         config: .github/config/auditor.yml
-  #         github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run Auditor Action
+        uses: GrantBirki/auditor-action@v3.0.1
+        with:
+          config: .github/config/auditor.yml
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
-  # # Job 4: Test Coverage
-  # test-and-coverage:
-  #   needs: setup
-  #   runs-on: self-hosted
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
+  # Job 4: Test Coverage
+  test-and-coverage:
+    needs: setup
+    runs-on: self-hosted
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-  #     - name: Set up Python
-  #       uses: actions/setup-python@v5
-  #       with:
-  #         python-version: '3.11'
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
 
-  #     - name: Install dependencies
-  #       run: |
-  #         python -m pip install --upgrade pip
-  #         pip install pytest pytest-cov
-  #         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-  #         if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-cov
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
 
-  #     - name: Run tests with coverage
-  #       run: |
-  #         pytest --cov=./ --cov-report=xml --cov-report=lcov tests/
-  #       continue-on-error: true
+      - name: Run tests with coverage
+        run: |
+          pytest --cov=./ --cov-report=xml --cov-report=lcov tests/
+        continue-on-error: true
 
-  #     - name: Upload coverage to Coveralls
-  #       uses: coverallsapp/github-action@v2
-  #       with:
-  #         github-token: ${{ secrets.GITHUB_TOKEN }}
-  #         path-to-lcov: ./coverage.lcov
-  #       continue-on-error: true
+      - name: Upload coverage to Coveralls
+        uses: coverallsapp/github-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: ./coverage.lcov
+        continue-on-error: true
 
-  # # Job 5: SBOM Generation
-  # generate-sbom:
-  #   needs: setup
-  #   runs-on: self-hosted
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
+  # Job 5: SBOM Generation
+  generate-sbom:
+    needs: setup
+    runs-on: self-hosted
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-  #     - name: Generate SBOM
-  #       uses: Brend-Smits/github-sbom-generator-action@v1.1
-  #       with:
-  #         file-name: 'sbom.spdx.json'
-  #         token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Generate SBOM
+        uses: Brend-Smits/github-sbom-generator-action@v1.1
+        with:
+          file-name: 'sbom.spdx.json'
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-  #     - name: Upload SBOM as artifact
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: sbom
-  #         path: sbom.spdx.json
+      - name: Upload SBOM as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom.spdx.json
 
-  #     - name: Comment on PR with SBOM info
-  #       if: github.event_name == 'pull_request'
-  #       uses: peter-evans/create-or-update-comment@v4
-  #       with:
-  #         issue-number: ${{ github.event.pull_request.number }}
-  #         body: |
-  #           ## 📦 Software Bill of Materials (SBOM)
+      - name: Comment on PR with SBOM info
+        if: github.event_name == 'pull_request'
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            ## 📦 Software Bill of Materials (SBOM)
             
-  #           SBOM has been generated for this PR. Download it from the workflow artifacts.
+            SBOM has been generated for this PR. Download it from the workflow artifacts.
             
-  #           This helps track dependencies and security vulnerabilities.
+            This helps track dependencies and security vulnerabilities.
 
-  # # Job 6: Changelog Management
-  # changelog-management:
-  #   needs: setup
-  #   runs-on: self-hosted
-  #   if: github.event_name == 'pull_request'
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
-  #       with:
-  #         ref: ${{ github.head_ref }}
-  #         token: ${{ secrets.GITHUB_TOKEN }}
+  # Job 6: Changelog Management
+  changelog-management:
+    needs: setup
+    runs-on: self-hosted
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-  #     - name: Create chango configuration
-  #       run: |
-  #         cat > chango.py << 'EOF'
-  #         from chango.concrete import (
-  #             CommentChangeNote,
-  #             CommentVersionNote,
-  #             DirectoryChanGo,
-  #             DirectoryVersionScanner,
-  #             HeaderVersionHistory,
-  #         )
+      - name: Create chango configuration
+        run: |
+          cat > chango.py << 'EOF'
+          from chango.concrete import (
+              CommentChangeNote,
+              CommentVersionNote,
+              DirectoryChanGo,
+              DirectoryVersionScanner,
+              HeaderVersionHistory,
+          )
 
-  #         chango_instance = DirectoryChanGo(
-  #             change_note_type=CommentChangeNote,
-  #             version_note_type=CommentVersionNote,
-  #             version_history_type=HeaderVersionHistory,
-  #             scanner=DirectoryVersionScanner(
-  #                 base_directory="changes",
-  #                 unreleased_directory="unreleased"
-  #             ),
-  #         )
-  #         EOF
+          chango_instance = DirectoryChanGo(
+              change_note_type=CommentChangeNote,
+              version_note_type=CommentVersionNote,
+              version_history_type=HeaderVersionHistory,
+              scanner=DirectoryVersionScanner(
+                  base_directory="changes",
+                  unreleased_directory="unreleased"
+              ),
+          )
+          EOF
           
-  #         mkdir -p changes/unreleased
+          mkdir -p changes/unreleased
           
-  #         cat > pyproject.toml << 'EOF'
-  #         [tool.chango]
-  #         sys_path = "."
-  #         chango_instance = { name = "chango_instance", module = "chango" }
-  #         EOF
+          cat > pyproject.toml << 'EOF'
+          [tool.chango]
+          sys_path = "."
+          chango_instance = { name = "chango_instance", module = "chango" }
+          EOF
 
-  #     - name: Create Chango Change Note
-  #       uses: Bibo-Joshi/chango@v0.5.0
-  #       with:
-  #         python-version: '3.11'
-  #       continue-on-error: true
+      - name: Create Chango Change Note
+        uses: Bibo-Joshi/chango@v0.5.0
+        with:
+          python-version: '3.11'
+        continue-on-error: true
 
-  # # Job 7: Extract and Manage Release Notes
-  # release-notes:
-  #   needs: setup
-  #   runs-on: self-hosted
-  #   if: github.event_name == 'release'
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
+  # Job 7: Extract and Manage Release Notes
+  release-notes:
+    needs: setup
+    runs-on: self-hosted
+    if: github.event_name == 'release'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-  #     - name: Extract release notes
-  #       id: extract-release-notes
-  #       uses: ffurrer2/extract-release-notes@v2
-  #       with:
-  #         changelog_file: CHANGELOG.md
+      - name: Extract release notes
+        id: extract-release-notes
+        uses: ffurrer2/extract-release-notes@v2
+        with:
+          changelog_file: CHANGELOG.md
 
-  #     - name: Create or update release comment
-  #       uses: peter-evans/create-or-update-comment@v4
-  #       with:
-  #         issue-number: ${{ github.event.release.id }}
-  #         body: |
-  #           ## 🚀 Release Notes
+      - name: Create or update release comment
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.release.id }}
+          body: |
+            ## 🚀 Release Notes
             
-  #           ${{ steps.extract-release-notes.outputs.release_notes }}
+            ${{ steps.extract-release-notes.outputs.release_notes }}
             
-  #           ---
-  #           *Automatically extracted from CHANGELOG.md*
+            ---
+            *Automatically extracted from CHANGELOG.md*
 
-  # # Job 8: Automated PR Creation for Updates
-  # auto-update-pr:
-  #   needs: [security-and-quality, test-and-coverage, generate-sbom]
-  #   runs-on: self-hosted
-  #   if: github.event_name == 'schedule'
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
+  # Job 8: Automated PR Creation for Updates
+  auto-update-pr:
+    needs: [security-and-quality, test-and-coverage, generate-sbom]
+    runs-on: self-hosted
+    if: github.event_name == 'schedule'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-  #     - name: Check for dependency updates
-  #       id: check-updates
-  #       run: |
-  #         # Simulate checking for updates
-  #         echo "updates_available=true" >> $GITHUB_OUTPUT
-  #         echo "update_summary=Security updates available for dependencies" >> $GITHUB_OUTPUT
+      - name: Check for dependency updates
+        id: check-updates
+        run: |
+          # Simulate checking for updates
+          echo "updates_available=true" >> $GITHUB_OUTPUT
+          echo "update_summary=Security updates available for dependencies" >> $GITHUB_OUTPUT
 
-  #     - name: Create or update PR for dependency updates
-  #       if: steps.check-updates.outputs.updates_available == 'true'
-  #       uses: gr2m/create-or-update-pull-request-action@v1
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #       with:
-  #         title: "chore: Automated dependency security updates"
-  #         body: |
-  #           ## 🔄 Automated Dependency Updates
+      - name: Create or update PR for dependency updates
+        if: steps.check-updates.outputs.updates_available == 'true'
+        uses: gr2m/create-or-update-pull-request-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          title: "chore: Automated dependency security updates"
+          body: |
+            ## 🔄 Automated Dependency Updates
             
-  #           This PR contains automated security and dependency updates.
+            This PR contains automated security and dependency updates.
             
-  #           **Summary:**
-  #           ${{ steps.check-updates.outputs.update_summary }}
+            **Summary:**
+            ${{ steps.check-updates.outputs.update_summary }}
             
-  #           **Checks performed:**
-  #           - ✅ Security scan with CodeQL
-  #           - ✅ Link validation
-  #           - ✅ SBOM generation
-  #           - ✅ Test coverage analysis
+            **Checks performed:**
+            - ✅ Security scan with CodeQL
+            - ✅ Link validation
+            - ✅ SBOM generation
+            - ✅ Test coverage analysis
             
-  #           Please review and merge if all checks pass.
+            Please review and merge if all checks pass.
             
-  #           ---
-  #           *This is an automated PR created by the CI/CD workflow.*
-  #         branch: automated-updates-${{ github.run_number }}
-  #         commit-message: "chore: Update dependencies and security patches"
-  #         labels: dependencies, automated
+            ---
+            *This is an automated PR created by the CI/CD workflow.*
+          branch: automated-updates-${{ github.run_number }}
+          commit-message: "chore: Update dependencies and security patches"
+          labels: dependencies, automated
 
-  # # Job 9: Final Status Report
-  # workflow-summary:
-  #   needs: [security-and-quality, audit-changes, test-and-coverage, generate-sbom, changelog-management]
-  #   runs-on: self-hosted
-  #   if: always() && github.event_name == 'pull_request'
-  #   steps:
-  #     - name: Create workflow summary comment
-  #       uses: peter-evans/create-or-update-comment@v4
-  #       with:
-  #         issue-number: ${{ github.event.pull_request.number }}
-  #         body: |
-  #           ## 📊 CI/CD Workflow Summary
+  # Job 9: Final Status Report
+  workflow-summary:
+    needs: [security-and-quality, audit-changes, test-and-coverage, generate-sbom, changelog-management]
+    runs-on: self-hosted
+    if: always() && github.event_name == 'pull_request'
+    steps:
+      - name: Create workflow summary comment
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            ## 📊 CI/CD Workflow Summary
             
-  #           | Check | Status |
-  #           |-------|--------|
-  #           | Security Analysis | ${{ needs.security-and-quality.result == 'success' && '✅ Passed' || '❌ Failed' }} |
-  #           | Code Audit | ${{ needs.audit-changes.result == 'success' && '✅ Passed' || needs.audit-changes.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} |
-  #           | Test Coverage | ${{ needs.test-and-coverage.result == 'success' && '✅ Passed' || '❌ Failed' }} |
-  #           | SBOM Generation | ${{ needs.generate-sbom.result == 'success' && '✅ Passed' || '❌ Failed' }} |
-  #           | Changelog | ${{ needs.changelog-management.result == 'success' && '✅ Passed' || needs.changelog-management.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} |
+            | Check | Status |
+            |-------|--------|
+            | Security Analysis | ${{ needs.security-and-quality.result == 'success' && '✅ Passed' || '❌ Failed' }} |
+            | Code Audit | ${{ needs.audit-changes.result == 'success' && '✅ Passed' || needs.audit-changes.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} |
+            | Test Coverage | ${{ needs.test-and-coverage.result == 'success' && '✅ Passed' || '❌ Failed' }} |
+            | SBOM Generation | ${{ needs.generate-sbom.result == 'success' && '✅ Passed' || '❌ Failed' }} |
+            | Changelog | ${{ needs.changelog-management.result == 'success' && '✅ Passed' || needs.changelog-management.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} |
             
-  #           **Workflow Run:** [View Details](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            **Workflow Run:** [View Details](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
             
-  #           ---
-  #           *All actions used in this workflow:*
-  #           - actions/checkout
-  #           - github/codeql-action/autobuild
-  #           - lycheeverse/lychee-action
-  #           - GrantBirki/auditor-action
-  #           - coverallsapp/github-action
-  #           - Brend-Smits/github-sbom-generator-action
-  #           - Bibo-Joshi/chango
-  #           - peter-evans/create-or-update-comment
-  #           - gr2m/create-or-update-pull-request-action
-  #           - ffurrer2/extract-release-notes
+            ---
+            *All actions used in this workflow:*
+            - actions/checkout
+            - github/codeql-action/autobuild
+            - lycheeverse/lychee-action
+            - GrantBirki/auditor-action
+            - coverallsapp/github-action
+            - Brend-Smits/github-sbom-generator-action
+            - Bibo-Joshi/chango
+            - peter-evans/create-or-update-comment
+            - gr2m/create-or-update-pull-request-action
+            - ffurrer2/extract-release-notes
