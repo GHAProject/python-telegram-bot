@@ -167,11 +167,15 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
+      - name: Create repository list file
+        run: |
+          echo "${{ github.repository }}" > repo-list.txt
+          cat repo-list.txt
       - name: Generate SBOM
         uses: Brend-Smits/github-sbom-generator-action@v1.1.0
         with:
-          file-name: 'sbom.spdx.json'
+          repo_list_path: './repo-list.txt'
+          save_directory_path: 'sboms'
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload SBOM as artifact
