@@ -182,7 +182,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: sbom
-          path: sboms
+          path: sboms/GHAProject/python-telegram-bot.json
 
       - name: Comment on PR with SBOM info
         if: github.event_name == 'pull_request'
