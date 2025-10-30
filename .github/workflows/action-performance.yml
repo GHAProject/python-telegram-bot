@@ -176,7 +176,7 @@ jobs:
         with:
           repo_list_path: './repo-list.txt'
           save_directory_path: 'sboms'
-          token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload SBOM as artifact
         uses: actions/upload-artifact@v4
