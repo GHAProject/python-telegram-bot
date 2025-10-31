@@ -1,0 +1,5 @@
+other = "Master pull request trigger"
+[[pull_requests]]
+uid = "2"
+author_uids = ["ROF13ThFloor"]
+closes_threads = []
