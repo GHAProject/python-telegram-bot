@@ -146,9 +146,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e ".[tests]"
 
-      - name: Run tests with coverage (excluding test_official)
+      - name: Run tests with coverage (only tests/ext)
         run: |
-          pytest --ignore=tests/test_official/ --cov=src --cov-report=xml --cov-report=term -v
+          pytest tests/ext/ --cov=src --cov-report=xml --cov-report=term -v
         continue-on-error: true
 
       - name: Check if coverage file exists
