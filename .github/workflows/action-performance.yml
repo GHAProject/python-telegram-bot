@@ -148,7 +148,7 @@ jobs:
 
       - name: Run tests with coverage (only tests/ext)
         run: |
-          pytest tests/ext/ --cov=src --cov-report=xml --cov-report=term -v
+          pytest tests/_games --cov=src --cov-report=xml --cov-report=term -v
         continue-on-error: true
 
       - name: Check if coverage file exists
