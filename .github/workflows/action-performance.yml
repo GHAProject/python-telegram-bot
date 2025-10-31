@@ -141,18 +141,26 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Install minimal test deps
+      - name: Install all test dependencies
         run: |
           python -m pip install --upgrade pip
+          # Install the package with ALL dependencies (includes bs4, etc.)
+          pip install -e ".[all]"
+          # Also install test dependencies
           pip install -e ".[tests]"
 
       - name: Run tests with coverage
         run: pytest
         continue-on-error: true
 
-      - name: Verify coverage file
+      - name: Check if coverage file exists
         run: |
-          ls -lh coverage.xml || echo "No coverage.xml generated"
+          if [ -f coverage.xml ]; then
+            echo "✅ coverage.xml found"
+            ls -lh coverage.xml
+          else
+            echo "❌ coverage.xml not found"
+          fi
 
       - name: Upload coverage to Coveralls
         if: always() && hashFiles('coverage.xml') != ''
