@@ -198,157 +198,157 @@ jobs:
   #           This helps track dependencies and security vulnerabilities.
 
   # Job 6: Changelog Management
-  changelog-management:
-    needs: setup
-    runs-on: self-hosted
-    if: github.event_name == 'pull_request'
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+  # changelog-management:
+  #   needs: setup
+  #   runs-on: self-hosted
+  #   if: github.event_name == 'pull_request'
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+  #       with:
+  #         ref: ${{ github.head_ref }}
+  #         token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Create chango configuration
-        run: |
-          cat > chango.py << 'EOF'
-          from chango.concrete import (
-              CommentChangeNote,
-              CommentVersionNote,
-              DirectoryChanGo,
-              DirectoryVersionScanner,
-              HeaderVersionHistory,
-          )
+  #     - name: Create chango configuration
+  #       run: |
+  #         cat > chango.py << 'EOF'
+  #         from chango.concrete import (
+  #             CommentChangeNote,
+  #             CommentVersionNote,
+  #             DirectoryChanGo,
+  #             DirectoryVersionScanner,
+  #             HeaderVersionHistory,
+  #         )
 
-          chango_instance = DirectoryChanGo(
-              change_note_type=CommentChangeNote,
-              version_note_type=CommentVersionNote,
-              version_history_type=HeaderVersionHistory,
-              scanner=DirectoryVersionScanner(
-                  base_directory="changes",
-                  unreleased_directory="unreleased"
-              ),
-          )
-          EOF
+  #         chango_instance = DirectoryChanGo(
+  #             change_note_type=CommentChangeNote,
+  #             version_note_type=CommentVersionNote,
+  #             version_history_type=HeaderVersionHistory,
+  #             scanner=DirectoryVersionScanner(
+  #                 base_directory="changes",
+  #                 unreleased_directory="unreleased"
+  #             ),
+  #         )
+  #         EOF
           
-          mkdir -p changes/unreleased
+  #         mkdir -p changes/unreleased
           
-          cat > pyproject.toml << 'EOF'
-          [tool.chango]
-          sys_path = "."
-          chango_instance = { name = "chango_instance", module = "chango" }
-          EOF
+  #         cat > pyproject.toml << 'EOF'
+  #         [tool.chango]
+  #         sys_path = "."
+  #         chango_instance = { name = "chango_instance", module = "chango" }
+  #         EOF
 
-      - name: Create Chango Change Note
-        uses: Bibo-Joshi/chango@0.5.0
-        with:
-          python-version: '3.12'
-        continue-on-error: true
+  #     - name: Create Chango Change Note
+  #       uses: Bibo-Joshi/chango@0.5.0
+  #       with:
+  #         python-version: '3.12'
+  #       continue-on-error: true
 
   # Job 7: Extract and Manage Release Notes
-  release-notes:
-    needs: setup
-    runs-on: self-hosted
-    if: github.event_name == 'release'
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+  # release-notes:
+  #   needs: setup
+  #   runs-on: self-hosted
+  #   if: github.event_name == 'release'
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
 
-      - name: Extract release notes
-        id: extract-release-notes
-        uses: ffurrer2/extract-release-notes@v2
-        with:
-          changelog_file: CHANGELOG.md
+  #     - name: Extract release notes
+  #       id: extract-release-notes
+  #       uses: ffurrer2/extract-release-notes@v2
+  #       with:
+  #         changelog_file: CHANGELOG.md
 
-      - name: Create or update release comment
-        uses: peter-evans/create-or-update-comment@v4
-        with:
-          issue-number: ${{ github.event.release.id }}
-          body: |
-            ## 🚀 Release Notes
+  #     - name: Create or update release comment
+  #       uses: peter-evans/create-or-update-comment@v4
+  #       with:
+  #         issue-number: ${{ github.event.release.id }}
+  #         body: |
+  #           ## 🚀 Release Notes
             
-            ${{ steps.extract-release-notes.outputs.release_notes }}
+  #           ${{ steps.extract-release-notes.outputs.release_notes }}
             
-            ---
-            *Automatically extracted from CHANGELOG.md*
+  #           ---
+  #           *Automatically extracted from CHANGELOG.md*
 
   # Job 8: Automated PR Creation for Updates
-  auto-update-pr:
-    needs: [security-and-quality, test-and-coverage, generate-sbom]
-    runs-on: self-hosted
-    if: github.event_name == 'schedule'
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+  # auto-update-pr:
+  #   needs: [security-and-quality, test-and-coverage, generate-sbom]
+  #   runs-on: self-hosted
+  #   if: github.event_name == 'schedule'
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
 
-      - name: Check for dependency updates
-        id: check-updates
-        run: |
-          # Simulate checking for updates
-          echo "updates_available=true" >> $GITHUB_OUTPUT
-          echo "update_summary=Security updates available for dependencies" >> $GITHUB_OUTPUT
+  #     - name: Check for dependency updates
+  #       id: check-updates
+  #       run: |
+  #         # Simulate checking for updates
+  #         echo "updates_available=true" >> $GITHUB_OUTPUT
+  #         echo "update_summary=Security updates available for dependencies" >> $GITHUB_OUTPUT
 
-      - name: Create or update PR for dependency updates
-        if: steps.check-updates.outputs.updates_available == 'true'
-        uses: gr2m/create-or-update-pull-request-action@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          title: "chore: Automated dependency security updates"
-          body: |
-            ## 🔄 Automated Dependency Updates
+  #     - name: Create or update PR for dependency updates
+  #       if: steps.check-updates.outputs.updates_available == 'true'
+  #       uses: gr2m/create-or-update-pull-request-action@v1
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #       with:
+  #         title: "chore: Automated dependency security updates"
+  #         body: |
+  #           ## 🔄 Automated Dependency Updates
             
-            This PR contains automated security and dependency updates.
+  #           This PR contains automated security and dependency updates.
             
-            **Summary:**
-            ${{ steps.check-updates.outputs.update_summary }}
+  #           **Summary:**
+  #           ${{ steps.check-updates.outputs.update_summary }}
             
-            **Checks performed:**
-            - ✅ Security scan with CodeQL
-            - ✅ Link validation
-            - ✅ SBOM generation
-            - ✅ Test coverage analysis
+  #           **Checks performed:**
+  #           - ✅ Security scan with CodeQL
+  #           - ✅ Link validation
+  #           - ✅ SBOM generation
+  #           - ✅ Test coverage analysis
             
-            Please review and merge if all checks pass.
+  #           Please review and merge if all checks pass.
             
-            ---
-            *This is an automated PR created by the CI/CD workflow.*
-          branch: automated-updates-${{ github.run_number }}
-          commit-message: "chore: Update dependencies and security patches"
-          labels: dependencies, automated
+  #           ---
+  #           *This is an automated PR created by the CI/CD workflow.*
+  #         branch: automated-updates-${{ github.run_number }}
+  #         commit-message: "chore: Update dependencies and security patches"
+  #         labels: dependencies, automated
 
   # Job 9: Final Status Report
-  workflow-summary:
-    needs: [security-and-quality, audit-changes, test-and-coverage, generate-sbom, changelog-management]
-    runs-on: self-hosted
-    if: always() && github.event_name == 'pull_request'
-    steps:
-      - name: Create workflow summary comment
-        uses: peter-evans/create-or-update-comment@v4
-        with:
-          issue-number: ${{ github.event.pull_request.number }}
-          body: |
-            ## 📊 CI/CD Workflow Summary
+  # workflow-summary:
+  #   needs: [security-and-quality, audit-changes, test-and-coverage, generate-sbom, changelog-management]
+  #   runs-on: self-hosted
+  #   if: always() && github.event_name == 'pull_request'
+  #   steps:
+  #     - name: Create workflow summary comment
+  #       uses: peter-evans/create-or-update-comment@v4
+  #       with:
+  #         issue-number: ${{ github.event.pull_request.number }}
+  #         body: |
+  #           ## 📊 CI/CD Workflow Summary
             
-            | Check | Status |
-            |-------|--------|
-            | Security Analysis | ${{ needs.security-and-quality.result == 'success' && '✅ Passed' || '❌ Failed' }} |
-            | Code Audit | ${{ needs.audit-changes.result == 'success' && '✅ Passed' || needs.audit-changes.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} |
-            | Test Coverage | ${{ needs.test-and-coverage.result == 'success' && '✅ Passed' || '❌ Failed' }} |
-            | SBOM Generation | ${{ needs.generate-sbom.result == 'success' && '✅ Passed' || '❌ Failed' }} |
-            | Changelog | ${{ needs.changelog-management.result == 'success' && '✅ Passed' || needs.changelog-management.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} |
+  #           | Check | Status |
+  #           |-------|--------|
+  #           | Security Analysis | ${{ needs.security-and-quality.result == 'success' && '✅ Passed' || '❌ Failed' }} |
+  #           | Code Audit | ${{ needs.audit-changes.result == 'success' && '✅ Passed' || needs.audit-changes.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} |
+  #           | Test Coverage | ${{ needs.test-and-coverage.result == 'success' && '✅ Passed' || '❌ Failed' }} |
+  #           | SBOM Generation | ${{ needs.generate-sbom.result == 'success' && '✅ Passed' || '❌ Failed' }} |
+  #           | Changelog | ${{ needs.changelog-management.result == 'success' && '✅ Passed' || needs.changelog-management.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} |
             
-            **Workflow Run:** [View Details](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+  #           **Workflow Run:** [View Details](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
             
-            ---
-            *All actions used in this workflow:*
-            - actions/checkout
-            - github/codeql-action/autobuild
-            - lycheeverse/lychee-action
-            - GrantBirki/auditor-action
-            - coverallsapp/github-action
-            - Brend-Smits/github-sbom-generator-action
-            - Bibo-Joshi/chango
-            - peter-evans/create-or-update-comment
-            - gr2m/create-or-update-pull-request-action
-            - ffurrer2/extract-release-notes
+  #           ---
+  #           *All actions used in this workflow:*
+  #           - actions/checkout
+  #           - github/codeql-action/autobuild
+  #           - lycheeverse/lychee-action
+  #           - GrantBirki/auditor-action
+  #           - coverallsapp/github-action
+  #           - Brend-Smits/github-sbom-generator-action
+  #           - Bibo-Joshi/chango
+  #           - peter-evans/create-or-update-comment
+  #           - gr2m/create-or-update-pull-request-action
+  #           - ffurrer2/extract-release-notes
