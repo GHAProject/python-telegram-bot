@@ -148,7 +148,7 @@ jobs:
           # installs pytest, pytest-cov, coverage (from [project.optional-dependencies].tests)
           pip install -e ".[tests]"
           # (optional) install your runtime extras if truly needed:
-          # pip install -e ".[all]"
+          pip install -e ".[all]"
 
       - name: Run tests with coverage
         run: pytest
