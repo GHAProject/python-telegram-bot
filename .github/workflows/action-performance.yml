@@ -240,7 +240,7 @@ jobs:
           EOF
 
       - name: Create Chango Change Note
-        uses: Bibo-Joshi/chango@v0.5.0
+        uses: Bibo-Joshi/chango@0.5.0
         with:
           python-version: '3.11'
         continue-on-error: true
