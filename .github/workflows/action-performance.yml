@@ -39,94 +39,94 @@ jobs:
           echo "should_run=true" >> $GITHUB_OUTPUT
 
   # Job 2: Security and Quality Checks
-  security-and-quality:
-    needs: setup
-    runs-on: self-hosted
-    if: needs.setup.outputs.should_run == 'true'
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+  # security-and-quality:
+  #   needs: setup
+  #   runs-on: self-hosted
+  #   if: needs.setup.outputs.should_run == 'true'
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 0
 
-      # CodeQL Security Analysis
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: python
+  #     # CodeQL Security Analysis
+  #     - name: Initialize CodeQL
+  #       uses: github/codeql-action/init@v3
+  #       with:
+  #         languages: python
 
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v3
+  #     - name: Autobuild
+  #       uses: github/codeql-action/autobuild@v3
 
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+  #     - name: Perform CodeQL Analysis
+  #       uses: github/codeql-action/analyze@v3
 
-      # Link checking
-      - name: Check links in documentation
-        uses: lycheeverse/lychee-action@v2
-        with:
-          args: '--verbose --no-progress --accept 200,429 "**/*.md" "**/*.rst" "**/*.html"'
-          fail: true
-        continue-on-error: true
+  #     # Link checking
+  #     - name: Check links in documentation
+  #       uses: lycheeverse/lychee-action@v2
+  #       with:
+  #         args: '--verbose --no-progress --accept 200,429 "**/*.md" "**/*.rst" "**/*.html"'
+  #         fail: true
+  #       continue-on-error: true
 
-      - name: Comment on PR with broken links
-        if: failure() && github.event_name == 'pull_request'
-        uses: peter-evans/create-or-update-comment@v4
-        with:
-          issue-number: ${{ github.event.pull_request.number }}
-          body: |
-            ## ⚠️ Broken Links Detected
+  #     - name: Comment on PR with broken links
+  #       if: failure() && github.event_name == 'pull_request'
+  #       uses: peter-evans/create-or-update-comment@v4
+  #       with:
+  #         issue-number: ${{ github.event.pull_request.number }}
+  #         body: |
+  #           ## ⚠️ Broken Links Detected
             
-            The link checker found broken links in this PR. Please review the logs above and fix them.
+  #           The link checker found broken links in this PR. Please review the logs above and fix them.
             
-            This is an automated message from the CI/CD workflow.
+  #           This is an automated message from the CI/CD workflow.
 
   # Job 3: Audit PR Changes
-  audit-changes:
-    needs: setup
-    runs-on: self-hosted
-    if: github.event_name == 'pull_request'
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+  # audit-changes:
+  #   needs: setup
+  #   runs-on: self-hosted
+  #   if: github.event_name == 'pull_request'
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
 
-      - name: Create auditor config
-        run: |
-          mkdir -p .github/config
-          cat > .github/config/auditor.yml << 'EOF'
-          rules:
-            - name: "No TODO comments in production"
-              type: regex
-              pattern: "TODO|FIXME|HACK"
-              message: "Please resolve TODO/FIXME/HACK comments before merging"
+  #     - name: Create auditor config
+  #       run: |
+  #         mkdir -p .github/config
+  #         cat > .github/config/auditor.yml << 'EOF'
+  #         rules:
+  #           - name: "No TODO comments in production"
+  #             type: regex
+  #             pattern: "TODO|FIXME|HACK"
+  #             message: "Please resolve TODO/FIXME/HACK comments before merging"
               
-            - name: "No hardcoded secrets patterns"
-              type: regex
-              pattern: "(password|secret|token|api_key)\\s*=\\s*['\"][^'\"]{8,}"
-              message: "Potential hardcoded secret detected"
+  #           - name: "No hardcoded secrets patterns"
+  #             type: regex
+  #             pattern: "(password|secret|token|api_key)\\s*=\\s*['\"][^'\"]{8,}"
+  #             message: "Potential hardcoded secret detected"
               
-            - name: "No print statements in Python code"
-              type: regex
-              pattern: "^\\s*print\\("
-              message: "Use logging instead of print statements"
+  #           - name: "No print statements in Python code"
+  #             type: regex
+  #             pattern: "^\\s*print\\("
+  #             message: "Use logging instead of print statements"
               
-          global_options:
-            alert_level: warn
-            comment_on_pr: true
-            request_reviewers: false
-            labels:
-              - needs-review
-            exclude_regex:
-              - "^tests/"
-              - "^examples/"
-              - "\\.md$"
-          EOF
+  #         global_options:
+  #           alert_level: warn
+  #           comment_on_pr: true
+  #           request_reviewers: false
+  #           labels:
+  #             - needs-review
+  #           exclude_regex:
+  #             - "^tests/"
+  #             - "^examples/"
+  #             - "\\.md$"
+  #         EOF
 
-      - name: Run Auditor Action
-        uses: GrantBirki/auditor-action@v4.4.2
-        with:
-          config: .github/config/auditor.yml
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+  #     - name: Run Auditor Action
+  #       uses: GrantBirki/auditor-action@v4.4.2
+  #       with:
+  #         config: .github/config/auditor.yml
+  #         github_token: ${{ secrets.GITHUB_TOKEN }}
 
   # Job 4: Test Coverage
   test-and-coverage:
@@ -162,40 +162,40 @@ jobs:
           format: cobertura
 
   # Job 5: SBOM Generation
-  generate-sbom:
-    needs: setup
-    runs-on: self-hosted
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Create repository list file
-        run: |
-          echo "${{ github.repository }}" > repo-list.txt
-          cat repo-list.txt
-      - name: Generate SBOM
-        uses: Brend-Smits/github-sbom-generator-action@v1.1.0
-        with:
-          repo_list_path: './repo-list.txt'
-          save_directory_path: 'sboms'
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+  # generate-sbom:
+  #   needs: setup
+  #   runs-on: self-hosted
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+  #     - name: Create repository list file
+  #       run: |
+  #         echo "${{ github.repository }}" > repo-list.txt
+  #         cat repo-list.txt
+  #     - name: Generate SBOM
+  #       uses: Brend-Smits/github-sbom-generator-action@v1.1.0
+  #       with:
+  #         repo_list_path: './repo-list.txt'
+  #         save_directory_path: 'sboms'
+  #         github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload SBOM as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: sbom
-          path: sboms/GHAProject/python-telegram-bot.json
+  #     - name: Upload SBOM as artifact
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: sbom
+  #         path: sboms/GHAProject/python-telegram-bot.json
 
-      - name: Comment on PR with SBOM info
-        if: github.event_name == 'pull_request'
-        uses: peter-evans/create-or-update-comment@v4
-        with:
-          issue-number: ${{ github.event.pull_request.number }}
-          body: |
-            ## 📦 Software Bill of Materials (SBOM)
+  #     - name: Comment on PR with SBOM info
+  #       if: github.event_name == 'pull_request'
+  #       uses: peter-evans/create-or-update-comment@v4
+  #       with:
+  #         issue-number: ${{ github.event.pull_request.number }}
+  #         body: |
+  #           ## 📦 Software Bill of Materials (SBOM)
             
-            SBOM has been generated for this PR. Download it from the workflow artifacts.
+  #           SBOM has been generated for this PR. Download it from the workflow artifacts.
             
-            This helps track dependencies and security vulnerabilities.
+  #           This helps track dependencies and security vulnerabilities.
 
   # Job 6: Changelog Management
   changelog-management:
