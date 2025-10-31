@@ -1,0 +1,26 @@
+rules:
+  - name: "No TODO comments in production"
+    type: regex
+    pattern: "TODO|FIXME|HACK"
+    message: "Please resolve TODO/FIXME/HACK comments before merging"
+
+  - name: "No hardcoded secrets patterns"
+    type: regex
+    pattern: "(password|secret|token|api_key)\\s*=\\s*['\"][^'\"]{8,}"
+    message: "Potential hardcoded secret detected"
+
+  - name: "No print statements in Python code"
+    type: regex
+    pattern: "^\\s*print\\("
+    message: "Use logging instead of print statements"
+
+global_options:
+  alert_level: warn
+  comment_on_pr: true
+  request_reviewers: false
+  labels:
+    - needs-review
+  exclude_regex:
+    - "^tests/"
+    - "^examples/"
+    - "\\.md$"
