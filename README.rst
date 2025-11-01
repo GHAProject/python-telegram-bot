@@ -241,4 +241,3 @@ You may copy, distribute and modify the software provided that modifications are
 Derivative works (including modifications or anything statically linked to the library) can only be redistributed under LGPL-3, but applications that use the library don't have to be.
 
 .. _`GitHub releases page`: https://github.com/python-telegram-bot/python-telegram-bot/releases
-
