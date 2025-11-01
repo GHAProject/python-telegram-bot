@@ -1,0 +1,5 @@
+other = "Update .git-blame-ignore-revs"
+[[pull_requests]]
+uid = "1"
+author_uids = ["ROF13ThFloor"]
+closes_threads = []
